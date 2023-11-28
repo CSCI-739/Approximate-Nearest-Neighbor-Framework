@@ -8,7 +8,6 @@
 #include <memory>
 #include <string>
 #include <sstream>
-#include <omp.h>
 using namespace std;
 
 void readInputFromFile(const string& filename, int& D, int& N, int& M, vector<Item>& base, vector<Item>& queries) {
@@ -129,8 +128,15 @@ int main(int argc, char* argv[]) {
         outfile << endl;
         total_hnsw_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
 
-        if (knns[0] == distPairs[0].second) numHits++;
+        if (knns[0] == distPairs[0].second) {
+            numHits++;
+        }
     }
+    
+
+    // myHNSWGraph.printGraph(); //Uncomment to visualize graph layers
+
+
     for (Item& item : base) {
         item.normalize();
     }

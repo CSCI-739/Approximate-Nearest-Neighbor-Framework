@@ -5,7 +5,6 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
-#include <omp.h>
 
 #include "../CPU/vector_initialize.h"
 using namespace std;

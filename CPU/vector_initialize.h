@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cmath>
-#include <omp.h>
+#include "omp.h"
 
 struct Item {
     Item(std::vector<double> _values) : values(_values) {}
@@ -54,7 +54,6 @@ struct Item {
 
     double cosine_similarity_with_normalisation(Item& other) {
         double dot_product = 0.0;
-        // #pragma omp parallel for reduction(+:dot_product)
         for (size_t i = 0; i < values.size(); ++i) {
             dot_product += values[i] * other.values[i];
         }
