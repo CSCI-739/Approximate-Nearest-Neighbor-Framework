@@ -11,7 +11,7 @@
 #include <sstream>
 using namespace std;
 
-void readInputFromFile(const string& filename, int& dim, int& numItems, int& numQueries, vector<Item>& randomItems, vector<Item>& queries) {
+void readInputFromFile(const string& filename, int& D, int& N, int& M, vector<Item>& base, vector<Item>& queries) {
     ifstream infile(filename);
     if (!infile.is_open()) {
         cerr << "Unable to open file " << filename << endl;
@@ -22,32 +22,30 @@ void readInputFromFile(const string& filename, int& dim, int& numItems, int& num
     getline(infile, firstLine);
 
     istringstream iss(firstLine);
-    if (!(iss >> dim >> numItems >> numQueries) || iss.rdbuf()->in_avail() > 0) {
+    if (!(iss >> D >> N >> M) || iss.rdbuf()->in_avail() > 0) {
         cerr << "Invalid format in the input file " << filename << endl;
         exit(EXIT_FAILURE);
     }
 
-    randomItems.reserve(numItems);
-    queries.reserve(numQueries);
+    base.reserve(N);
+    queries.reserve(M);
 
-    // Read base vectors
-    for (int i = 0; i < numItems; ++i) {
-        vector<double> temp(dim);
-        for (int j = 0; j < dim; ++j) {
+    for (int i = 0; i < N; ++i) {
+        vector<double> temp(D);
+        for (int j = 0; j < D; ++j) {
             if (!(infile >> temp[j])) {
                 cerr << "Invalid format in the input file " << filename << " at line " << (i + 2) << endl;
                 exit(EXIT_FAILURE);
             }
         }
-        randomItems.emplace_back(temp);
+        base.emplace_back(temp);
     }
 
-    // Read queries
-    for (int i = 0; i < numQueries; ++i) {
-        vector<double> temp(dim);
-        for (int j = 0; j < dim; ++j) {
+    for (int i = 0; i < M; ++i) {
+        vector<double> temp(D);
+        for (int j = 0; j < D; ++j) {
             if (!(infile >> temp[j])) {
-                cerr << "Invalid format in the input file " << filename << " at line " << (numItems + i + 2) << endl;
+                cerr << "Invalid format in the input file " << filename << " at line " << (N + i + 2) << endl;
                 exit(EXIT_FAILURE);
             }
         }
@@ -60,12 +58,13 @@ void readInputFromFile(const string& filename, int& dim, int& numItems, int& num
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 2) {
-        cerr << "Usage: " << argv[0] << " <filename>" << endl;
+    if (argc != 3) {
+        cerr << "Usage: " << argv[0] << " <input_filename> <output_filename>" << endl;
         return EXIT_FAILURE;
     }
 
     string filename = argv[1];
+    string outputFilename = argv[2];
     int K = 5;
 
     ifstream infile(filename);
@@ -74,43 +73,55 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    int numItems = 0, dim = 0, numQueries = 0;
+    int N = 0, D = 0, M = 0;
 
-    std::vector<Item> randomItems, queries;
+    std::vector<Item> base, queries;
 
-    readInputFromFile(filename, dim, numItems, numQueries, randomItems, queries);
+    readInputFromFile(filename, D, N, M, base, queries);
 
     HNSWGraph myHNSWGraph(10, 30, 30, 10, 2);
 
-    for (int i = 0; i < numItems; ++i) {
-        myHNSWGraph.Insert(randomItems[i]);
+    for (int i = 0; i < N; ++i) {
+        myHNSWGraph.Insert(base[i]);
     }
 
     double total_brute_force_time = 0.0;
     double total_hnsw_time = 0.0;
 
     int numHits = 0;
+    ofstream outfile(outputFilename);
 
-    for (int i = 0; i < numQueries; ++i) {
+    if (!outfile.is_open()) {
+        cerr << "Unable to open output file " << outputFilename << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < M; ++i) {
         Item query = queries[i];
-
-        // Brute force
         clock_t begin_time = clock();
         vector<pair<double, int>> distPairs;
-        for (int j = 0; j < numItems; ++j) {
+        for (int j = 0; j < N; ++j) {
             if (j == i) continue;
-            distPairs.emplace_back(query.dist(randomItems[j]), j);
+            distPairs.emplace_back(query.dist(base[j]), j);
         }
         sort(distPairs.begin(), distPairs.end());
         total_brute_force_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
 
         begin_time = clock();
         vector<int> knns = myHNSWGraph.KNNSearch(query, K);
+        for (size_t idx = 0; idx < knns.size(); ++idx) {
+            outfile << knns[idx];
+            if (idx != knns.size() - 1) {
+                outfile << " ";
+            }
+        }
+        outfile << endl;
         total_hnsw_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
 
         if (knns[0] == distPairs[0].second) numHits++;
     }
-    cout << numHits << " " << total_brute_force_time / numQueries << " " << total_hnsw_time / numQueries << endl;
+    outfile.close();
+    cout << numHits << " " << total_brute_force_time / M << " " << total_hnsw_time / M << endl;
 
 	return 0;
 }
