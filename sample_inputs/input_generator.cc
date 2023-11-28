@@ -27,7 +27,7 @@ void dump_func(int cas,int D,int N,int M,double T){
 	printf("dumping case %d\n",cas);
 	std::string file_name = "sample" + std::to_string(cas) + ".in";
 	FILE* fp = fopen(file_name.c_str(),"w");
-	fprintf(fp,"%d %d %d %f\n",D,N,M,T);
+	fprintf(fp,"%d %d %d\n",D,N,M);
   std::vector<std::vector<double>> data;
   for(int i = 0;i < N;++i){
     std::vector<double> tmp;
@@ -67,19 +67,10 @@ void dump_func(int cas,int D,int N,int M,double T){
 }
 
 int main(){
-  // dump_func(12,128,10000, 10000,0.9);
   // Dimensions, Base Vectors, Queries, Targets
   dump_func(1,2,10,5,0.9);
   dump_func(2,4,50,10,0.9);
   dump_func(3,4,1000,100,0.9);
-  // dump_func(3,128,1000000,10000,0.9);
-  // dump_func(4,128,1000000,10000,0.95);
-  // dump_func(5,256,1000000,10000,0.9);
-  // dump_func(6,256,1000000,10000,0.95);
-  // dump_func(7,512,500000,10000,0.9);
-  // dump_func(8,512,500000,10000,0.95);
-  // dump_func(9,512,1000000,10000,0.9);
-  // dump_func(10,512,1000000,10000,0.95);
   return 0;
 }
 
