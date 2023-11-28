@@ -1,5 +1,4 @@
 #include "hnsw_implementation/hnsw.h"
-
 #include <algorithm>
 #include <ctime>
 #include <iostream>
@@ -9,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <omp.h>
 using namespace std;
 
 void readInputFromFile(const string& filename, int& D, int& N, int& M, vector<Item>& base, vector<Item>& queries) {
@@ -85,7 +85,9 @@ int main(int argc, char* argv[]) {
         myHNSWGraph.Insert(base[i]);
     }
 
-    double total_brute_force_time = 0.0;
+    double total_euclidean_time = 0.0;
+    double total_cosine_time = 0.0;
+    double total_cosine_normalised_time = 0.0;
     double total_hnsw_time = 0.0;
 
     int numHits = 0;
@@ -105,9 +107,18 @@ int main(int argc, char* argv[]) {
             distPairs.emplace_back(query.dist(base[j]), j);
         }
         sort(distPairs.begin(), distPairs.end());
-        total_brute_force_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
+        total_euclidean_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
 
         begin_time = clock();
+
+        for (int j = 0; j < N; ++j) {
+            if (j == i) continue;
+            double cos_sim = query.cosine_similarity(base[j]);
+        }
+        total_cosine_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
+
+        begin_time = clock();
+
         vector<int> knns = myHNSWGraph.KNNSearch(query, K);
         for (size_t idx = 0; idx < knns.size(); ++idx) {
             outfile << knns[idx];
@@ -120,8 +131,27 @@ int main(int argc, char* argv[]) {
 
         if (knns[0] == distPairs[0].second) numHits++;
     }
+    for (Item& item : base) {
+        item.normalize();
+    }
+
+    for (Item& item : queries) {
+        item.normalize();
+    }
+    for (int i = 0; i < M; ++i) {
+        Item query = queries[i];
+        clock_t begin_time = clock();
+        for (int j = 0; j < N; ++j) {
+            if (j == i) continue;
+            double cos_sim_normalized = query.cosine_similarity_with_normalisation(base[j]);
+        }
+        total_cosine_normalised_time += double(clock() - begin_time) / CLOCKS_PER_SEC;
+    }
     outfile.close();
-    cout << numHits << " " << total_brute_force_time / M << " " << total_hnsw_time / M << endl;
+    cout << "Total euclidean time: " << total_euclidean_time << endl;
+    cout << "Total HNSW time: " << total_hnsw_time << endl;
+    cout << "Total cosine similarity time: " << total_cosine_time << endl;
+    cout << "Total cosine similarity with normalization time: " << total_cosine_normalised_time << endl;
 
 	return 0;
 }

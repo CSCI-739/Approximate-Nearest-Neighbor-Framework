@@ -7,6 +7,7 @@
 #include <set>
 #include <unordered_set>
 #include <vector>
+#include <omp.h>
 using namespace std;
 
 vector<int> HNSWGraph::searchLayer(Item& q, int ep, int ef, int lc) {
