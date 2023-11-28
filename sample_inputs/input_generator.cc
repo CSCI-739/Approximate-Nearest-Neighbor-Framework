@@ -71,6 +71,7 @@ int main(){
   dump_func(1,2,10,5,0.9);
   dump_func(2,4,50,10,0.9);
   dump_func(3,4,1000,100,0.9);
+  dump_func(4,5,10000,100,0.9);
   return 0;
 }
 

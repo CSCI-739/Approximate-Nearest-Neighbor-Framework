@@ -1,5 +1,5 @@
-#include "hnsw.h"
-
+#include "hnsw_implementation/hnsw.h"
+#include "./CPU/vector_initialize.h"
 #include <algorithm>
 #include <ctime>
 #include <iostream>

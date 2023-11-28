@@ -5,19 +5,11 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <omp.h>
+
+#include "../CPU/vector_initialize.h"
 using namespace std;
 
-struct Item {
-	Item(vector<double> _values):values(_values) {}
-	vector<double> values;
-	double dist(Item& other) {
-		double result = 0.0;
-		for (int i = 0; i < values.size(); i++){ 
-            result += (values[i] - other.values[i]) * (values[i] - other.values[i]);
-        }
-		return result;
-	}
-};
 
 struct HNSWGraph {
 	HNSWGraph(int _M, int _MMax, int _MMax0, int _efConstruction, int _ml):M(_M),MMax(_MMax),MMax0(_MMax0),efConstruction(_efConstruction),ml(_ml){
