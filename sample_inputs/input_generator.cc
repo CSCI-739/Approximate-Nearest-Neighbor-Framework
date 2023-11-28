@@ -27,7 +27,7 @@ void dump_func(int cas,int D,int N,int M,double T){
 	printf("dumping case %d\n",cas);
 	std::string file_name = "sample" + std::to_string(cas) + ".in";
 	FILE* fp = fopen(file_name.c_str(),"w");
-	fprintf(fp,"%d %d %d %f\n",D,N,M,T);
+	fprintf(fp,"%d %d %d\n",D,N,M);
   std::vector<std::vector<double>> data;
   for(int i = 0;i < N;++i){
     std::vector<double> tmp;
