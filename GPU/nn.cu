@@ -107,11 +107,11 @@ int main(int argc, char* argv[]) {
     cudaFree(d_query);
     cudaFree(d_max_cosine);
 
-    end_time = clock(); // Record the ending time
+    end_time = clock(); 
 
     total_cosine_GPU_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
 
-    std::cout << "Total cosine similarity with GPU: " << total_cosine_GPU_time << " seconds." << std::endl;
+    std::cout << "Total cosine similarity with GPU: " << total_cosine_GPU_time << std::endl;
 
     return 0;
 }

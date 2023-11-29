@@ -94,7 +94,7 @@ void HNSWGraph::Insert(Item& query) {
 	int maxLayer = layerEdgeLists.size() - 1;
 	int l = 0;
 	uniform_real_distribution<double> distribution(0.0,1.0);
-	while(l < ml && (1.0 / ml <= distribution(generator))) {
+	while(l < max_layers && (1.0 / max_layers <= distribution(generator))) {
 		l++;
 		if (layerEdgeLists.size() <= l) {
 			layerEdgeLists.push_back(unordered_map<int, vector<int>>());
@@ -110,7 +110,7 @@ void HNSWGraph::Insert(Item& query) {
 	}
 	#pragma omp parallel for
 	for (int i = min(l, maxLayer); i >= 0; i--) {
-		int MM = l == 0 ? MMax0 : MMax;
+		int MM = l == 0 ? maxNeighboursIn0 : maxNeighbours;
 		vector<int> neighbours = searchLayer(query, entry_point, efficientConstruction, i);
 		vector<int> selectedNeighbours = vector<int>(neighbours.begin(), neighbours.begin()+min(int(neighbours.size()), M));
 		for (size_t j = 0; j < selectedNeighbours.size(); j++) {
