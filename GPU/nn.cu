@@ -2,11 +2,12 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <ctime>
 #include <vector>
 #include <cmath>
 #include <cuda_runtime.h>
 
-__global__ void findNearestNeighborCosine(float *points, float *queries, float *max_cosine, int *max_index, int n, int num_queries, int dimensions, float target_similarity) {
+__global__ void findNearestNeighborCosine(float *points, float *queries, float *max_cosine, int n, int num_queries, int dimensions) {
     extern __shared__ char shared[];
     float *s_cosine = (float*)shared;
     int *s_index = (int*)(shared + blockDim.x * sizeof(float));
@@ -33,8 +34,6 @@ __global__ void findNearestNeighborCosine(float *points, float *queries, float *
 
         s_cosine[threadIdx.x] = cosine_similarity;
         s_index[threadIdx.x] = tid;
-        if(cosine_similarity > target_similarity)
-            max_index[qid] = tid;
         __syncthreads();
     }
 }
@@ -55,11 +54,13 @@ std::vector<std::vector<float>> read_matrix(FILE* fin, int row, int col) {
 
 int main(int argc, char* argv[]) {
     FILE* fin = fopen(argv[1], "r");
-    FILE* fout = fopen(argv[2], "w");
 
     int n = 0, d = 0, m = 0;
-    float target_similarity = 0;
-    fscanf(fin, "%d%d%d%f", &d, &n, &m, &target_similarity);
+    fscanf(fin, "%d%d%d", &d, &n, &m);
+
+    double total_cosine_GPU_time = 0.0;
+
+    clock_t start_time, end_time;
 
     std::vector<std::vector<float>> base = read_matrix(fin, n, d);
     std::vector<std::vector<float>> query = read_matrix(fin, m, d);
@@ -73,13 +74,12 @@ int main(int argc, char* argv[]) {
 
     
     float* d_base, * d_query, *d_max_cosine;
-    int *d_max_index;
 
-    
+    start_time = clock();
+
     cudaMalloc(&d_base, n * d * sizeof(float));
     cudaMalloc(&d_query, m * d * sizeof(float));
     cudaMalloc(&d_max_cosine, m * sizeof(float));
-    cudaMalloc(&d_max_index, m * sizeof(int));
 
   
     float *max_cosine_host = new float[m];
@@ -98,23 +98,20 @@ int main(int argc, char* argv[]) {
 
     
     int sharedMemSize = threadsPerBlock.x * (sizeof(float) + sizeof(int));
-    findNearestNeighborCosine<<<blocksPerGrid, threadsPerBlock, sharedMemSize>>>(d_base, d_query, d_max_cosine, d_max_index, n, m, d, target_similarity);
+    findNearestNeighborCosine<<<blocksPerGrid, threadsPerBlock, sharedMemSize>>>(d_base, d_query, d_max_cosine, n, m, d);
 
    
-    int *max_index_host = new int[m];
     cudaMemcpy(max_cosine_host, d_max_cosine, m * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(max_index_host, d_max_index, m * sizeof(int), cudaMemcpyDeviceToHost);
-
-   
-    for (int i = 0; i < m; ++i) {
-        fprintf(fout, "%d\n", max_index_host[i]);
-    }
-
     
     cudaFree(d_base);
     cudaFree(d_query);
     cudaFree(d_max_cosine);
-    cudaFree(d_max_index);
+
+    end_time = clock(); // Record the ending time
+
+    total_cosine_GPU_time = static_cast<double>(end_time - start_time) / CLOCKS_PER_SEC;
+
+    std::cout << "Total cosine similarity with GPU: " << total_cosine_GPU_time << " seconds." << std::endl;
 
     return 0;
 }
