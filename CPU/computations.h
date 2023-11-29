@@ -1,5 +1,5 @@
-#ifndef ITEMS_H
-#define ITEMS_H
+#ifndef COMPUTATIONS_H
+#define COMPUTATIONS_H
 
 #include <vector>
 #include <fstream>

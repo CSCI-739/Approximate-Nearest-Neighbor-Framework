@@ -11,13 +11,13 @@ using namespace std;
 
 
 struct HNSWGraph {
-	HNSWGraph(int _M, int _MMax, int _MMax0, int _efConstruction, int _ml):M(_M),MMax(_MMax),MMax0(_MMax0),efConstruction(_efConstruction),ml(_ml){
+	HNSWGraph(int _M, int _MMax, int _MMax0, int _efficientConstruction, int _ml):M(_M),MMax(_MMax),MMax0(_MMax0),efficientConstruction(_efficientConstruction),ml(_ml){
 		layerEdgeLists.push_back(unordered_map<int, vector<int>>());
 	}
 	int M;
 	int MMax;
 	int MMax0;
-	int efConstruction;
+	int efficientConstruction;
 	int ml;
 	int itemNum;
 	vector<Item> items;
