@@ -22,31 +22,31 @@ Total cosine similarity with normalization time: 5.251 sec<br />
 
 # FILE STRUCTURE
 
-Approximate Nearest Neighbours/
-│
-├── CPU/
-│   ├── computations.h
-│   
-│
-├── GPU/
-│   ├── header1.h
-│   └── header2.h
-│
-├── hnsw_implementation/
-│   ├── hnsw_py.cpp
-│   ├── hnsw.cpp
-│   └── hnsw.h
-│
-├── sample_inputs/
-│   ├── compile_generator.sh
-│   └── input_generator.cc
-│
-├── sample_outputs/
-│   
-├── compile.sh
-│
-├── main.cpp
-│
-├── run.sh
-│
-└── README.md
+Approximate Nearest Neighbours/<br />
+│<br />
+├── CPU/<br />
+│   ├── computations.h<br />
+│   <br />
+│<br />
+├── GPU/<br />
+│   ├── header1.h<br />
+│   └── header2.h<br />
+│<br />
+├── hnsw_implementation/<br />
+│   ├── hnsw_py.cpp<br />
+│   ├── hnsw.cpp<br />
+│   └── hnsw.h<br />
+│<br />
+├── sample_inputs/<br />
+│   ├── compile_generator.sh<br />
+│   └── input_generator.cc<br />
+│<br />
+├── sample_outputs/<br />
+│   <br />
+├── compile.sh<br />
+│<br />
+├── main.cpp<br />
+│<br />
+├── run.sh<br />
+│<br />
+└── README.md<br />
