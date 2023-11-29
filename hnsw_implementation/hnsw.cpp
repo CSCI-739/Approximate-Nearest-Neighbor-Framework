@@ -8,9 +8,15 @@
 #include <unordered_set>
 #include <vector>
 #include <omp.h>
+#include <cmath> 
+#include <limits> 
 using namespace std;
 
 vector<int> HNSWGraph::searchLayer(Item& q, int entry_point, int ef, int lc) {
+	if (lc < 0 || lc >= layerEdgeLists.size()) {
+        cerr << "Error: Invalid layer index." << endl;
+        exit(EXIT_FAILURE); 
+    }
 	set<pair<double, int>> candidates;
 	set<pair<double, int>> nearestNeighbors;
 	unordered_set<int> isVisited;
@@ -49,7 +55,18 @@ vector<int> HNSWGraph::searchLayer(Item& q, int entry_point, int ef, int lc) {
 	return results;
 }
 
-vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
+vector<int> HNSWGraph::KNNSearch(Item& q, int K, int N) {
+
+	if (K <= 0 || std::ceil(K) != K || K > std::numeric_limits<int>::max()) {
+		cerr << "Error: Invalid value of K for KNNSearch." << endl;
+		exit(EXIT_FAILURE); 
+	}
+
+	if (K > N) {
+        std::cerr << "Error: Value of K (" << K << ") is greater than the number of data points (N = " << N << ")." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+	
 	int maxLyer = layerEdgeLists.size() - 1;
 	int entry_point = enterNode;
 	for (int l = maxLyer; l >= 1; l--) {
@@ -59,6 +76,10 @@ vector<int> HNSWGraph::KNNSearch(Item& q, int K) {
 }
 
 void HNSWGraph::addEdge(int st, int ed, int lc) {
+	if (lc < 0 || lc >= layerEdgeLists.size()) {
+        cerr << "Error: Invalid layer index." << endl;
+        return;
+    }
 	if (st == ed) {
 		return;
 	}
@@ -91,10 +112,12 @@ void HNSWGraph::Insert(Item& q) {
 		int MM = l == 0 ? MMax0 : MMax;
 		vector<int> neighbors = searchLayer(q, entry_point, efConstruction, i);
 		vector<int> selectedNeighbors = vector<int>(neighbors.begin(), neighbors.begin()+min(int(neighbors.size()), M));
-		for (int n: selectedNeighbors) {
-			addEdge(n, nid, i);
-		}
-		for (int n: selectedNeighbors) {
+		for (size_t j = 0; j < selectedNeighbors.size(); j++) {
+            int n = selectedNeighbors[j];
+            addEdge(n, nid, i);
+        }
+		for (size_t j = 0; j < selectedNeighbors.size(); j++)  {
+			int n = selectedNeighbors[j];
 			if (layerEdgeLists[i][n].size() > MM) {
 				vector<pair<double, int>> distPairs;
 				for (int nn: layerEdgeLists[i][n]) {

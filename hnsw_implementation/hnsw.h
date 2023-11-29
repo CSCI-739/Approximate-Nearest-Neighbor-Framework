@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "../CPU/vector_initialize.h"
+#include "../CPU/initialization.h"
 using namespace std;
 
 
@@ -28,7 +28,7 @@ struct HNSWGraph {
 	void addEdge(int st, int ed, int lc);
 	vector<int> searchLayer(Item& q, int ep, int ef, int lc);
 	void Insert(Item& q);
-	vector<int> KNNSearch(Item& q, int K);
+	vector<int> KNNSearch(Item& q, int K, int N);
 
 	void printGraph() {
 		for (int l = 0; l < layerEdgeLists.size(); l++) {

@@ -2,8 +2,14 @@
 #define ITEMS_H
 
 #include <vector>
+#include <fstream>
+#include <iostream>
 #include <cmath>
+#include <memory>
+#include <string>
+#include <sstream>
 #include "omp.h"
+using namespace std;
 
 struct Item {
     Item(std::vector<double> _values) : values(_values) {}

@@ -1,1 +1,1 @@
-./my_program $1 $2
+./my_program $1 $2 $3

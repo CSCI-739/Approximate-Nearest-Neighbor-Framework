@@ -1,4 +1,5 @@
 #include "hnsw_implementation/hnsw.h"
+#include "CPU/initialization.h"
 #include <algorithm>
 #include <ctime>
 #include <iostream>
@@ -54,17 +55,26 @@ void readInputFromFile(const string& filename, int& D, int& N, int& M, vector<It
     infile.close();
 }
 
-
 int main(int argc, char* argv[]) {
 
-    if (argc != 3) {
-        cerr << "Usage: " << argv[0] << " <input_filename> <output_filename>" << endl;
+    if (argc != 4) {
+        cerr << "Usage: " << argv[0] << " <input_filename> <output_filename> <Integer value of k>" << endl;
         return EXIT_FAILURE;
     }
 
     string filename = argv[1];
     string outputFilename = argv[2];
-    int K = 5;
+    
+    int K;
+    try {
+        K = std::stoi(argv[3]); 
+    } catch (std::invalid_argument const& e) {
+        std::cerr << "Invalid argument: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    } catch (std::out_of_range const& e) {
+        std::cerr << "Out of range argument: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     ifstream infile(filename);
     if (!infile.is_open()) {
@@ -77,6 +87,11 @@ int main(int argc, char* argv[]) {
     std::vector<Item> base, queries;
 
     readInputFromFile(filename, D, N, M, base, queries);
+
+    if (K > N) {
+        std::cerr << "Error: Value of K (" << K << ") is greater than the number of data points (N = " << N << ")." << std::endl;
+        return EXIT_FAILURE;
+    }
 
     HNSWGraph myHNSWGraph(10, 30, 30, 10, 2);
 
@@ -118,7 +133,7 @@ int main(int argc, char* argv[]) {
 
         begin_time = clock();
 
-        vector<int> knns = myHNSWGraph.KNNSearch(query, K);
+        vector<int> knns = myHNSWGraph.KNNSearch(query, K, N);
         for (size_t idx = 0; idx < knns.size(); ++idx) {
             outfile << knns[idx];
             if (idx != knns.size() - 1) {
