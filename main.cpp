@@ -1,5 +1,5 @@
 #include "hnsw_implementation/hnsw.h"
-#include "CPU/initialization.h"
+#include "CPU/computations.h"
 #include <algorithm>
 #include <ctime>
 #include <iostream>

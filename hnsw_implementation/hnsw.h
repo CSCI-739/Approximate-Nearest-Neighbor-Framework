@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "../CPU/initialization.h"
+#include "../CPU/computations.h"
 using namespace std;
 
 
